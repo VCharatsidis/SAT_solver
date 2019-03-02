@@ -1,4 +1,6 @@
 
+import copy
+
 def rules():
     filename = "rules.txt"
 
@@ -112,112 +114,308 @@ print("Vars length")
 print(len(vars))
 print(vars)
 
+cnf_solved = False
+
 true_clauses = []
-defined_variables = []
 pure_literal = []
 unit_clauses = []
-available_vars = []
+vars_with_clauses = []
+solution = []
 
 for key in vars:
-    available_vars.append(key)
+    vars_with_clauses.append(key)
 
 backtrack = False
 
-def davis_putnam(true_clauses, defined_variables, pure_literal, unit_clauses, available_vars):
-    nonlocal backtrack
-    dc_true_clauses = []
-    dc_true_clauses.deepcopy(true_clauses)
 
-    dc_defined_variables = []
-    dc_defined_variables.deepcopy(defined_variables)
+def davis_putnam():
+    global backtrack
 
-    dc_pure_literal = []
-    dc_pure_literal.deepcopy(pure_literal)
+    vars_changes = {}
+    clauses_changes = {}
+    pure_literal_changes = []
+    vars_with_clauses_changes = []
+    unit_clauses_changes = []
+    true_clauses_changes = []
 
-    dc_unit_clauses = []
-    dc_unit_clauses.deepcopy(unit_clauses)
+    if cnf_solved:
+        return
 
-    dc_available_vars = []
-    dc_available_vars.deepcopy(available_vars)
+    dc_pure_literal = copy.deepcopy(pure_literal)
 
-    if len(dc_unit_clauses) > 0:
-        var = clauses[dc_unit_clauses[0]][0]
-        dc_available_vars.remove(var)
-        dc_defined_variables.append(var)
-        dc_unit_clauses.remove(dc_unit_clauses[0])
-        set_variable_true(var, dc_true_clauses, dc_defined_variables, dc_pure_literal, dc_unit_clauses, dc_available_vars)
-        davis_putnam(dc_true_clauses, dc_defined_variables, dc_pure_literal, dc_unit_clauses, dc_available_vars)
+    for var in dc_pure_literal:
+        print("pure_literal "+var)
+        set_variable_true(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+        if is_real_var(var):
+            solution.append(var)
 
         if backtrack:
             backtrack = False
-            opp_var = opposite_var(var)
-            available_vars.remove(opp_var)
-            defined_variables.append(opp_var)
-            unit_clauses.remove(dc_unit_clauses[0])
-            set_variable_true(opp_var, true_clauses, defined_variables, pure_literal, unit_clauses, available_vars)
-            davis_putnam(true_clauses, defined_variables, pure_literal, unit_clauses, available_vars)
+            restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                    unit_clauses_changes, true_clauses_changes)
+            if var in solution:
+                solution.remove(var)
+            set_variable_false(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+            if backtrack:
+                restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                        unit_clauses_changes, true_clauses_changes)
+                backtrack = False
+                return
+            else:
+                davis_putnam()
 
-    if len(dc_pure_literal) > 0:
-        var = dc_pure_literal[0]
-        dc_available_vars.remove(var)
-        dc_defined_variables.append(var)
-        dc_pure_literal.remove(dc_pure_literal[0])
-        set_variable_true(var, dc_true_clauses, dc_defined_variables, dc_pure_literal, dc_unit_clauses, dc_available_vars)
-        davis_putnam(dc_true_clauses, dc_defined_variables, dc_pure_literal, dc_unit_clauses, dc_available_vars)
+                print("unsolvable")
+                return
+
+        else:
+            delete_var(var, vars_with_clauses_changes, pure_literal_changes)
+            davis_putnam()
+            restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                    unit_clauses_changes, true_clauses_changes)
+            set_variable_false(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes,
+                               pure_literal_changes, unit_clauses_changes)
+            davis_putnam()
+            print("unsolvable")
+            return
+
+
+    dc_unit_clauses = copy.deepcopy(unit_clauses)
+
+    for clause in dc_unit_clauses:
+        print("unit_clause " + str(clause))
+        var = clauses[clause][0]
+        print("unit_clause var clauses" + var)
+        set_variable_true(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+
+        if is_real_var(var):
+            solution.append(var)
 
         if backtrack:
             backtrack = False
-            opp_var = opposite_var(var)
-            available_vars.remove(opp_var)
-            defined_variables.append(var)
-            pure_literal.remove(dc_pure_literal[0])
-            set_variable_true(opp_var, true_clauses, defined_variables, pure_literal, unit_clauses, available_vars)
-            davis_putnam(true_clauses, defined_variables, pure_literal, unit_clauses, available_vars)
 
-    if len(dc_available_vars) > 0:
-        var = dc_available_vars[0]
-        dc_available_vars.remove(var);
-        dc_defined_variables.append(var)
-        set_variable_true(var, dc_true_clauses, dc_defined_variables, dc_pure_literal, dc_unit_clauses, dc_available_vars)
-        davis_putnam(dc_true_clauses, dc_defined_variables, dc_pure_literal, dc_unit_clauses, dc_available_vars)
+            if var in solution:
+                solution.remove(var)
+            restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                        unit_clauses_changes, true_clauses_changes)
+            set_variable_false(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+            if backtrack:
+                restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                        unit_clauses_changes, true_clauses_changes)
+                backtrack = False
+                return
+            else:
+                davis_putnam()
+                restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                        unit_clauses_changes, true_clauses_changes)
+        else:
+            delete_var(var, vars_with_clauses_changes, pure_literal_changes)
+            if clause in unit_clauses:
+                unit_clauses.remove(clause)
+            davis_putnam()
+            restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                    unit_clauses_changes, true_clauses_changes)
+
+
+    print("vars_with_clauses "+str((len(vars_with_clauses))))
+    print(vars_with_clauses)
+
+    for var in vars_with_clauses:
+
+        print("normal " + var)
+        set_variable_true(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+
+        if is_real_var(var):
+            solution.append(var)
 
         if backtrack:
             backtrack = False
-            opp_var = opposite_var(var)
-            defined_variables.append(var)
-            available_vars.remove(opp_var)
-            set_variable_true(opp_var, true_clauses, defined_variables, pure_literal, unit_clauses, available_vars)
-            davis_putnam(true_clauses, defined_variables, pure_literal, unit_clauses, available_vars)
+            if var in solution:
+                solution.remove(var)
+            restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes, unit_clauses_changes, true_clauses_changes)
+            set_variable_false(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+            if backtrack:
+                restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                        unit_clauses_changes, true_clauses_changes)
+                backtrack = False
+                return
+            else:
+                davis_putnam()
+                restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                        unit_clauses_changes, true_clauses_changes)
+
+        else:
+            delete_var(var, vars_with_clauses_changes, pure_literal_changes)
+            davis_putnam()
+            restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes,
+                    unit_clauses_changes, true_clauses_changes)
+
+    print("solution")
+    print(solution)
+
+
+def restore(vars_changes, clauses_changes, pure_literal_changes, vars_with_clauses_changes, unit_clauses_changes, true_clauses_changes):
+    for var in vars_changes:
+        for clause in vars_changes[var]:
+            vars[var].append(clause)
+
+    for clause in clauses_changes:
+        for var in clauses_changes[clause]:
+            clauses[clause].append(var)
+
+    for var in pure_literal_changes:
+        pure_literal.remove(var)
+
+    for clause in unit_clauses_changes:
+        unit_clauses.remove(clause)
+
+    for var in vars_with_clauses_changes:
+        vars_with_clauses.append(var)
+
+    for clause in true_clauses_changes:
+        true_clauses.remove(clause)
 
 
 
-def set_variable_true(var, true_clauses, defined_variables, pure_literal, unit_clauses, available_vars):
+def set_variable_false(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes):
+    global backtrack
+    for clause in vars[var]:
+        if len(clauses[clause]) == 1:
+            backtrack = True
+            return
+
+    opp_var = opposite_var(var)
+    delete_var(opp_var, vars_with_clauses_changes, pure_literal_changes)
+    delete_var(var, vars_with_clauses_changes, pure_literal_changes)
+
+    for clause in vars[var]:
+
+        clauses[clause].remove(var)
+        if clause not in clauses_changes:
+            clause_vars = []
+            clause_vars.append(var)
+            clauses_changes[clause] = clause_vars
+        else:
+             clauses_changes[clause].appned(var)
+
+        if len(clauses[clause]) == 1:
+
+            unit_clauses.append(clause)
+            unit_clauses_changes.append(clause)
+
+    handle_true_opposite_var(opp_var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes)
+
+
+def handle_true_opposite_var(opposite_var, vars_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes):
+    for clause in vars[opposite_var]:
+
+        true_clauses.append(clause)
+        true_clauses_changes.append(clause)
+
+        is_solved(true_clauses)
+
+        for variable in clauses[clause]:
+
+            vars[variable].remove(clause)
+            if variable not in vars_changes:
+                var_clauses = []
+                var_clauses.append(clause)
+                vars_changes[variable] = var_clauses
+            else:
+                vars_changes[variable].append(clause)
+
+            if len(vars[variable]) == 0:
+
+                vars_with_clauses.remove(var)
+
+                vars_with_clauses_changes.add(var)
+
+                var = opposite_var(variable)
+
+                pure_literal.append(var)
+                pure_literal_changes.append(var)
+
+
+def set_variable_true(var, vars_changes, clauses_changes, true_clauses_changes, vars_with_clauses_changes, pure_literal_changes, unit_clauses_changes):
+    global backtrack
+    opp_var = opposite_var(var)
+    handle_false_opposite_var(opp_var, clauses_changes, unit_clauses_changes)
+
+    if backtrack:
+        return
+
+    delete_var(opp_var, vars_with_clauses_changes, pure_literal_changes)
+    delete_var(var, vars_with_clauses_changes, pure_literal_changes)
+
     for clause in vars[var]:
         true_clauses.append(clause)
         is_solved(true_clauses)
 
+        clauses[clause].remove(var)
+        if clause not in clauses_changes:
+            clause_vars = []
+            clause_vars.append(var)
+            clauses_changes[clause] = clause_vars
+        else:
+            clauses_changes[clause].appned(var)
+
         for variable in clauses[clause]:
+
             vars[variable].remove(clause)
+            if variable not in vars_changes:
+                var_clauses = []
+                var_clauses.append(clause)
+                vars_changes[variable] = var_clauses
+            else:
+                vars_changes[variable].append(clause)
+
             if len(vars[variable]) == 0:
+                delete_var(variable, vars_with_clauses_changes, pure_literal_changes)
                 opp_variable = opposite_var(variable)
-                pure_literal.append(opp_variable)
-                defined_variables.append(variable)
 
-    opp_var = opposite_var(var)
-    handle_opposite_var(opp_var)
-    defined_variables.append(opp_var)
+                if opp_variable in vars_with_clauses:
+                    pure_literal.append(opp_variable)
+                    pure_literal_changes.append(opp_variable)
 
 
-def handle_opposite_var(opposite_var):
-    nonlocal backtrack
-    for clause in vars[opposite_var]:
-        clauses[clause].remove(opposite_var)
+def delete_var(var, vars_with_clauses_changes, pure_literal_changes):
+    if var in vars_with_clauses:
+        vars_with_clauses.remove(var)
+        vars_with_clauses_changes.append(var)
+    if var in pure_literal:
+        pure_literal.remove(var)
 
-        if not clauses[clause]:
+
+def handle_false_opposite_var(opposite_var, clauses_changes, unit_clauses_changes):
+    global backtrack
+    print("opposite_var : "+opposite_var)
+    var_clauses = vars[opposite_var]
+    print(var_clauses)
+    for clause in var_clauses:
+        if len(clauses[clause]) == 1:
+            print(clauses[clause])
+            print("BACKTRAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACK-------------------------")
             backtrack = True
+            return
 
-        elif len(clauses[clause]) == 1:
+    for clause in var_clauses:
+        print("clause " + str(clause))
+        print(clauses[clause])
+        if opposite_var in clauses[clause]:
+
+            clauses[clause].remove(opposite_var)
+
+            if clause not in clauses_changes:
+                clause_vars = []
+                clause_vars.append(opposite_var)
+                clauses_changes[clause] = clause_vars
+            else:
+                clauses_changes[clause].append(opposite_var)
+
+        print(clauses[clause])
+        if len(clauses[clause]) == 1:
+
             unit_clauses.append(clause)
+            unit_clauses_changes.append(clause)
 
 
 def opposite_var(var):
@@ -229,9 +427,19 @@ def opposite_var(var):
     return opp_var
 
 
+def is_real_var(var):
+    if var[0] == '-':
+        return False
+    else:
+        return True
+
+
 def is_solved(true_clauses):
+    global cnf_solved
     if len(true_clauses) == total_clauses:
+        cnf_solved = True
+        print(len(solution))
         print("PROBLEM SOLVED!!!")
 
 
-
+davis_putnam()
