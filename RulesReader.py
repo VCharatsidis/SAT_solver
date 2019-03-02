@@ -35,7 +35,7 @@ clauses = {}
 not_vars = []
 normal_vars = []
 
-def fill_dictionaries_rules():
+def fill_dictionaries_rules(sudoku_clauses):
     '''
     it fills vars and clauses dictionoaries and return them
     vars is a dictionary with keys strings and values a list of integers,
@@ -53,23 +53,24 @@ def fill_dictionaries_rules():
         ind = index - 1
         variables = line.split()
         variables.pop()
-        clauses[ind] = variables
+        clause_index = sudoku_clauses + ind
+        clauses[clause_index] = variables
 
         for v in variables:
 
             if v not in vars:
                 var_clauses = []
-                var_clauses.append(ind)
+                var_clauses.append(clause_index)
                 vars[v] = var_clauses
                 if v[0] == '-':
                     not_vars.append(v)
                 else:
                     normal_vars.append(v)
             else:
-                vars[v].append(ind)
+                vars[v].append(clause_index)
 
 
-def fill_dictionaries_sudoku(clauses_number):
+def fill_dictionaries_sudoku():
     '''
     it fills vars and clauses dictionoaries with the extra rules of a given sudoku
 
@@ -81,29 +82,34 @@ def fill_dictionaries_sudoku(clauses_number):
 
         variables = line.split()
         variables.pop()
-        clauses[index + clauses_number] = variables
+        clauses[index] = variables
 
         for v in variables:
 
             if v not in vars:
                 var_clauses = []
-                var_clauses.append(index + clauses_number)
+                var_clauses.append(index)
                 vars[v] = var_clauses
                 if v[0] == '-':
                     not_vars.append(v)
                 else:
                     normal_vars.append(v)
             else:
-                vars[v].append(index + clauses_number)
+                vars[v].append(index)
 
 
-fill_dictionaries_rules()
+
+
+fill_dictionaries_sudoku()
+print(normal_vars)
+print(not_vars)
+
+sudoku_clauses = len(clauses)
+
+fill_dictionaries_rules(sudoku_clauses)
 print(len(clauses))
 total_clauses = len(clauses)
 
-fill_dictionaries_sudoku(total_clauses)
-print(normal_vars)
-print(not_vars)
 
 total_clauses = len(clauses)
 

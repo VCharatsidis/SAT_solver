@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c0bf069-b0b6-40f9-af7a-4c126bc7068f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RulesReader.py" beforeDir="false" afterPath="$PROJECT_DIR$/RulesReader.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/RulesReader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="268" lean-forward="true" selection-start-line="268" selection-end-line="268" />
+            <state relative-caret-position="357">
+              <caret line="60" column="29" lean-forward="true" selection-start-line="60" selection-start-column="29" selection-end-line="60" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -43,8 +42,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1074" />
-    <option name="y" value="-13" />
+    <option name="x" value="1078" />
+    <option name="y" value="-9" />
     <option name="width" value="1766" />
     <option name="height" value="1056" />
   </component>
@@ -127,7 +126,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1074" y="-13" width="1766" height="1056" extended-state="0" />
+    <frame x="1078" y="-9" width="1766" height="1056" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.0666491" />
@@ -135,7 +134,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32871974" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.14084508" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.2567714" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39869988" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -189,8 +188,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RulesReader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="268" lean-forward="true" selection-start-line="268" selection-end-line="268" />
+        <state relative-caret-position="357">
+          <caret line="60" column="29" lean-forward="true" selection-start-line="60" selection-start-column="29" selection-end-line="60" selection-end-column="29" />
         </state>
       </provider>
     </entry>
