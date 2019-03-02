@@ -160,11 +160,16 @@ remove_tautologies()
 print("true clauses")
 print(true_clauses)
 
+recursive_calls = 0
 
 def davis_putnam(vars_with_clauses, true_clauses, pure_literal, unit_clauses, vars, clauses):
     global cnf_solved
+    global recursive_calls
 
-    print(solution)
+    recursive_calls += 1
+
+    print(str(recursive_calls) + ' ' + str(solution))
+
     if cnf_solved:
         return
 
@@ -183,7 +188,7 @@ def davis_putnam(vars_with_clauses, true_clauses, pure_literal, unit_clauses, va
     backtrack = case_true(var, dc_true_clauses, dc_pure_literal, dc_unit_clauses, dc_vars, dc_clauses)
 
     if backtrack:
-
+        print("BACKTRACKKK TOPPPPP")
         #restore(var, vars_changes, clauses_changes, True)
         solution.remove(var)
         dc_true_clauses = copy.deepcopy(true_clauses)
@@ -195,15 +200,19 @@ def davis_putnam(vars_with_clauses, true_clauses, pure_literal, unit_clauses, va
         backtrack = case_false(var, dc_true_clauses, dc_unit_clauses, dc_vars, dc_clauses)
 
         if backtrack:
+            print("SECONDDDDDDDDDDDDD        BACKTRACKKK TOPPPPP")
             #restore(var, vars_changes, clauses_changes, False)
             return True
 
-        davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses, dc_vars, dc_clauses)
+        backtrack = davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses, dc_vars, dc_clauses)
+        return backtrack
+
 
     else:
         backtrack = davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses, dc_vars, dc_clauses)
 
         if backtrack:
+            print("THIRD        BACKTRACKKK TOPPPPP")
             #restore(var, vars_changes, clauses_changes, True)
             solution.remove(var)
             dc_true_clauses = copy.deepcopy(true_clauses)
@@ -215,6 +224,7 @@ def davis_putnam(vars_with_clauses, true_clauses, pure_literal, unit_clauses, va
             backtrack = case_false(var, dc_true_clauses, dc_unit_clauses, dc_vars, dc_clauses)
 
             if backtrack:
+                print("fourth        BACKTRACKKK TOPPPPP")
                 #restore(var, vars_changes, clauses_changes, False)
                 return True
 
@@ -222,7 +232,7 @@ def davis_putnam(vars_with_clauses, true_clauses, pure_literal, unit_clauses, va
             print("UNSOLVED")
             return backtrack
 
-    return True
+    return False
 
 
 # def restore(var, vars_changes, clauses_changes, opposite):
@@ -249,12 +259,13 @@ def case_false(var, dc_true_clauses, unit_clauses, dc_vars, dc_clauses):
         if clause not in dc_true_clauses:
             dc_clauses[clause].remove(var)
 
-            if len(clauses[clause]) == 1:
+            if len(dc_clauses[clause]) == 1:
                 unit_clauses.append(clause)
 
-            elif len(clauses[clause]) == 0:
+            elif len(dc_clauses[clause]) == 0:
                 backtrack = True
                 return backtrack
+
 
     opp_var = opposite_var(var)
     var_clauses = dc_vars[opp_var]
