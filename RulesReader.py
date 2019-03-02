@@ -155,61 +155,89 @@ print(true_clauses)
 
 def davis_putnam(vars_with_clauses, true_clauses, pure_literal, unit_clauses):
     global backtrack
+    global cnf_solved
+
+    if cnf_solved:
+        return
+
+    var = vars_with_clauses[0]
+
+    print("")
+    print("var " + str(var))
+    #print("len(solution) " + str(len(solution)))
+    print("solution " + str(solution))
+    print("")
+
+    if var == '-111':
+        print(vars[var])
 
     dc_vars_with_clauses = copy.deepcopy(vars_with_clauses)
 
-    for var in vars_with_clauses:
-        dc_vars_with_clauses.remove(var)
-        solution.append(var)
+    dc_vars_with_clauses.remove(var)
+    solution.append(var)
+    dc_true_clauses = copy.deepcopy(true_clauses)
+    dc_pure_literal = copy.deepcopy(pure_literal)
+    dc_unit_clauses = copy.deepcopy(unit_clauses)
+    vars_changes = {}
+    clauses_changes = []
+
+    case_true(var, dc_true_clauses, vars_changes, dc_pure_literal, clauses_changes, dc_unit_clauses)
+
+    if backtrack:
+        print("backtrack")
+        restore(var, vars_changes, clauses_changes)
+        solution.remove(var)
+        backtrack = False
+
         dc_true_clauses = copy.deepcopy(true_clauses)
         dc_pure_literal = copy.deepcopy(pure_literal)
         dc_unit_clauses = copy.deepcopy(unit_clauses)
         vars_changes = {}
         clauses_changes = []
 
-        case_true(var, dc_true_clauses, vars_changes, dc_pure_literal, clauses_changes, dc_unit_clauses)
+        case_false(var, dc_true_clauses, vars_changes, clauses_changes, dc_unit_clauses)
+        print("vars_changes " + str(vars_changes) + " " )
+        print("clauses_changes " + str(clauses_changes) + " ")
 
         if backtrack:
-            restore(var, vars_changes, clauses_changes)
-            solution.remove(var)
             backtrack = False
-
-            dc_true_clauses = copy.deepcopy(true_clauses)
-            dc_pure_literal = copy.deepcopy(pure_literal)
-            dc_unit_clauses = copy.deepcopy(unit_clauses)
-            vars_changes = {}
-            clauses_changes = []
-
-            case_false(var, dc_true_clauses, vars_changes, clauses_changes, dc_unit_clauses)
-
-            if backtrack:
-                print("UNSOLVABLE")
-                backtrack = False
-                return
-            else:
-                davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses)
-
-        else:
-            davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses)
             restore(var, vars_changes, clauses_changes)
-            solution.remove(var)
+            return
+
+        davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses)
+
+    else:
+        davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses)
+        print("after dp " +str(var))
+
+        restore(var, vars_changes, clauses_changes)
+        solution.remove(var)
+        backtrack = False
+
+        dc_true_clauses = copy.deepcopy(true_clauses)
+        dc_pure_literal = copy.deepcopy(pure_literal)
+        dc_unit_clauses = copy.deepcopy(unit_clauses)
+        vars_changes = {}
+        clauses_changes = []
+
+        case_false(var, dc_true_clauses, vars_changes, clauses_changes, dc_unit_clauses)
+
+        if backtrack:
             backtrack = False
+            restore(var, vars_changes, clauses_changes)
+            return
 
-            dc_true_clauses = copy.deepcopy(true_clauses)
-            dc_pure_literal = copy.deepcopy(pure_literal)
-            dc_unit_clauses = copy.deepcopy(unit_clauses)
-            vars_changes = {}
-            clauses_changes = []
+        davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses)
 
-            case_false(var, dc_true_clauses, vars_changes, clauses_changes, dc_unit_clauses)
-
-            davis_putnam(dc_vars_with_clauses, dc_true_clauses, dc_pure_literal, dc_unit_clauses)
-
-    print(len(solution))
-    print(solution)
+        backtrack = True
+        print("UNSOLVED")
+        return
 
 
 def restore(var, vars_changes, clauses_changes):
+    # print("restore")
+    # print(clauses_changes)
+    # print(vars_changes)
     for vari in vars_changes:
         for c in vars_changes[vari]:
             vars[vari].append(c)
@@ -223,15 +251,21 @@ def case_false(var, dc_true_clauses, vars_changes, clauses_changes, unit_clauses
     global backtrack
     var_clauses = vars[var]
 
-    # print(var)
-    # print(var)
-    # print(var_clauses)
+    print("Case False")
+
+    print("var_clauses " + str(var_clauses))
+
     for clause in var_clauses:
         if clause not in dc_true_clauses:
+
             # print(clause)
             # print(clauses[clause])
             clauses[clause].remove(var)
             clauses_changes.append(clause)
+
+            if var == '118':
+                print("clause of 118 " + str(clause))
+                print("len clause " + str(len(clauses[clause])))
 
             if len(clauses[clause]) == 1:
                 unit_clauses.append(clause)
@@ -250,6 +284,8 @@ def case_false(var, dc_true_clauses, vars_changes, clauses_changes, unit_clauses
 
             clause_variables = clauses[clause]
             for variable in clause_variables:
+                # if variable == '-112':
+                #     print("vars[variable] of -112 "+str(vars[variable]) +" "+str(clause))
                 vars[variable].remove(clause)
 
                 if variable not in vars_changes:
@@ -260,6 +296,7 @@ def case_false(var, dc_true_clauses, vars_changes, clauses_changes, unit_clauses
                     vars_changes[variable].append(clause)
 
     is_solved(dc_true_clauses)
+
 
 
 def case_true(var, dc_true_clauses, vars_changes, dc_pure_literal, clauses_changes, unit_clauses):
@@ -289,13 +326,13 @@ def case_true(var, dc_true_clauses, vars_changes, dc_pure_literal, clauses_chang
 
     opp_var = opposite_var(var)
     clauses_opp_var = vars[opp_var]
-    print(var)
-    print(opp_var)
-    print(clauses_opp_var)
+    print("opp_var "+str(opp_var))
+    print("clauses_opp_var "+str(clauses_opp_var))
+
     for clause in clauses_opp_var:
         if clause not in dc_true_clauses:
-            print(clause)
-            print(clauses[clause])
+            print("clause "+str(clause))
+            print("clauses[clause] "+str(clauses[clause]))
             clauses[clause].remove(opp_var)
             clauses_changes.append(clause)
 

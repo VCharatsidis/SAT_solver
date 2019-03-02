@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c0bf069-b0b6-40f9-af7a-4c126bc7068f" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/hardest.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RulesReader.py" beforeDir="false" afterPath="$PROJECT_DIR$/RulesReader.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/RulesReader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="20" column="23" selection-start-line="20" selection-start-column="23" selection-end-line="20" selection-end-column="23" />
+            <state relative-caret-position="-150">
+              <caret line="212" column="33" selection-start-line="212" selection-start-column="21" selection-end-line="212" selection-end-column="33" />
             </state>
           </provider>
         </entry>
@@ -63,7 +62,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="447" />
     <option name="y" value="4" />
-    <option name="width" value="1790" />
+    <option name="width" value="3289" />
     <option name="height" value="1000" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -154,11 +153,11 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="447" y="4" width="1790" height="1000" extended-state="0" />
+    <frame x="447" y="4" width="3289" height="1000" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20057803" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.07804274" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Version Control" />
       <window_info anchor="bottom" id="Python Console" weight="0.32921174" />
@@ -166,8 +165,8 @@
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32871974" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.38177624" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.39974293" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.29411766" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39907727" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32921174" />
@@ -195,8 +194,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/RulesReader.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="20" column="23" selection-start-line="20" selection-start-column="23" selection-end-line="20" selection-end-column="23" />
+        <state relative-caret-position="-150">
+          <caret line="212" column="33" selection-start-line="212" selection-start-column="21" selection-end-line="212" selection-end-column="33" />
         </state>
       </provider>
     </entry>
