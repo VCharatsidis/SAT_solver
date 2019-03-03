@@ -1,11 +1,45 @@
 import time
+from collections import Counter
 
 
 def __select_literal(cnf):
+    # if exists unit clause use this
     unit_clauses = [c for c in cnf if len(c) == 1]
+
     for c in unit_clauses:
         for literal in c:
             return literal[0]
+
+    #Check for pure literals
+    var_counts = Counter()
+    for c in cnf:
+        for pred in c:
+            if pred[1]:
+                var_counts[pred[0]] += 1
+            else:
+                var_counts[-pred[0]] += 1
+
+    for v in variables:
+        if v in var_counts and (var_counts[v] == 0 or var_counts[-v] == 0):
+            return v
+
+
+    # find most constrained variable heuristic
+    var = max(variables, key=lambda x: var_counts[x])
+    return var
+
+    # clause length heuristic
+    unit_clauses = [c for c in cnf if len(c) == 3]
+
+    for c in unit_clauses:
+        for literal in c:
+            return literal[0]
+
+    # find biggest clause and use this
+    unit_clauses = max(cnf, key=len)
+    for c in unit_clauses:
+        return c[0]
+
     for c in cnf:
         for literal in c:
             return literal[0]
@@ -130,8 +164,8 @@ rules = read_sudoku("hardest.txt") + rules
 print(len(rules))
 
 print(rules)
-
 cnf = make_cnf(rules)
+variables = set(p[0] for c in cnf for p in c)
 print(cnf)
 
 start = time.time()
