@@ -1,6 +1,23 @@
 import time
 from collections import Counter
 
+# returns from the smallest clause the most used variable.
+def heuristic_literal(cnf):
+    # find smallest clause and use this
+
+    min_clause = min(cnf, key=len)
+
+    var_counts = Counter()
+    for pred in min_clause:
+        if pred[1]:
+            var_counts[pred[0]] += 1
+        else:
+            var_counts[-pred[0]] += 1
+
+    variables = set(p[0] for p in min_clause)
+    var = max(variables, key=lambda x: (var_counts[x]+var_counts[-x]))
+    return var
+
 
 def __select_literal(cnf):
     # if exists unit clause use this
@@ -19,9 +36,10 @@ def __select_literal(cnf):
             else:
                 var_counts[-pred[0]] += 1
 
-    for v in variables:
-        if v in var_counts and (var_counts[v] == 0 or var_counts[-v] == 0):
-            return v
+    # Return pure literal if exists.
+    # for v in variables:
+    #     if v in var_counts and (var_counts[v] == 0 or var_counts[-v] == 0):
+    #         return v
 
 
     # find most constrained variable heuristic
@@ -62,7 +80,8 @@ def dpll(cnf, assignments={}):
     if any([len(c) == 0 for c in cnf]):
         return False, None
 
-    literal = __select_literal(cnf)
+    #literal = __select_literal(cnf)
+    literal = heuristic_literal(cnf)
 
     new_cnf = [c for c in cnf if (literal, True) not in c]
     new_cnf = [c.difference({(literal, False)}) for c in new_cnf]
