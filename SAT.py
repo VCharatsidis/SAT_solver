@@ -7,6 +7,12 @@ from enum import Enum
 
 
 
+class Algo(Enum):
+    dpll = 1
+    dlcs = 2
+
+
+
 
 # returns from the smallest clause the most used variable.
 def heuristic_literal(cnf):
@@ -186,6 +192,30 @@ def draw_sudoku(solution):
 
 
 
+def monitoring(inputfiles, strategy, output_file=os.path.join(os.getcwd(), 'data', 'metrics.csv')):
+    methods = {
+        Algo.dpll: __select_literal,
+        Algo.dlcs: heuristic_literal
+    }[strategy]
+
+    result = []
+
+    for inputfile in inputfiles:
+        clauses = read_sudoku(inputfile)
+        out_file = inputfile + '.out'
+        cnf = make_cnf(clauses)
+        solved, solution = dpll(cnf)
+        start = time.time()
+        stop = time.time()
+        time_taken = stop - start
+        result.append({
+            'inputfile': inputfile,
+            'solved': solved,
+            'time': time_taken,
+            'strategy': strategy.name,
+
+        })
+    return result
 
 
 
@@ -198,15 +228,17 @@ def main():
 
     args = parser.parse_args()
     inputfiles = args.inputfiles
-    strategy = args.strategy
+    strategy = Algo(args.strategy)
 
-    get_stats(inputfiles, strategy)
+    monitoring(inputfiles, strategy)
 
 
 
 
 if __name__ == '__main__':
     main()
+
+
 
 
 
