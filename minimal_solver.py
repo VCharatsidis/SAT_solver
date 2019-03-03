@@ -37,27 +37,30 @@ def __select_literal(cnf):
                 var_counts[-pred[0]] += 1
 
     # Return pure literal if exists.
-    # for v in variables:
-    #     if v in var_counts and (var_counts[v] == 0 or var_counts[-v] == 0):
-    #         return v
+    for v in variables:
+        if v in var_counts and (var_counts[v] == 0 or var_counts[-v] == 0):
+            return v
 
+    # for c in cnf:
+    #     for literal in c:
+    #         return literal[0]
 
     # find most constrained variable heuristic
-    var = max(variables, key=lambda x: var_counts[x])
-    return var
-
-    # clause length heuristic
-    unit_clauses = [c for c in cnf if len(c) == 3]
-
-    for c in unit_clauses:
-        for literal in c:
-            return literal[0]
-
-    # find biggest clause and use this
-    unit_clauses = max(cnf, key=len)
-    for c in unit_clauses:
-        return c[0]
-
+    # var = max(variables, key=lambda x: var_counts[x])
+    # return var
+    #
+    # # clause length heuristic
+    # unit_clauses = [c for c in cnf if len(c) == 3]
+    #
+    # for c in unit_clauses:
+    #     for literal in c:
+    #         return literal[0]
+    #
+    # # find biggest clause and use this
+    # unit_clauses = max(cnf, key=len)
+    # for c in unit_clauses:
+    #     return c[0]
+    #
     for c in cnf:
         for literal in c:
             return literal[0]
@@ -80,8 +83,8 @@ def dpll(cnf, assignments={}):
     if any([len(c) == 0 for c in cnf]):
         return False, None
 
-    #literal = __select_literal(cnf)
-    literal = heuristic_literal(cnf)
+    literal = __select_literal(cnf)
+    #literal = heuristic_literal(cnf)
 
     new_cnf = [c for c in cnf if (literal, True) not in c]
     new_cnf = [c.difference({(literal, False)}) for c in new_cnf]
