@@ -1,16 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/ python
 
-
-import time, copy, argparse, os.path, logging
+import time,glob, argparse, sys
 from collections import Counter
-from enum import Enum
 
-
-
-class Algo(Enum):
-    dpll = 1
-    dlcs = 2
-
+path = "./data/*.txt"
+sudokus = glob.glob(path)
 
 
 
@@ -50,30 +44,11 @@ def __select_literal(cnf):
                 var_counts[-pred[0]] += 1
 
     # Return pure literal if exists.
+    variables = set(p[0] for c in cnf for p in c)
     for v in variables:
         if v in var_counts and (var_counts[v] == 0 or var_counts[-v] == 0):
             return v
 
-    # for c in cnf:
-    #     for literal in c:
-    #         return literal[0]
-
-    # find most constrained variable heuristic
-    # var = max(variables, key=lambda x: var_counts[x])
-    # return var
-    #
-    # # clause length heuristic
-    # unit_clauses = [c for c in cnf if len(c) == 3]
-    #
-    # for c in unit_clauses:
-    #     for literal in c:
-    #         return literal[0]
-    #
-    # # find biggest clause and use this
-    # unit_clauses = max(cnf, key=len)
-    # for c in unit_clauses:
-    #     return c[0]
-    #
     for c in cnf:
         for literal in c:
             return literal[0]
@@ -96,6 +71,7 @@ def dpll(cnf, assignments={}):
     if any([len(c) == 0 for c in cnf]):
         return False, None
 
+
     literal = __select_literal(cnf)
     #literal = heuristic_literal(cnf)
 
@@ -113,6 +89,37 @@ def dpll(cnf, assignments={}):
 
     return False, None
 
+def dpll_heur(cnf, assignments={}):
+    global rec_calls
+    global min_clauses_left
+    rec_calls += 1
+    min_clauses_left = min(min_clauses_left, len(cnf))
+    if rec_calls % 1000 == 0:
+        print(str(rec_calls) + ' ' + str(len(assignments)) + ' clauses_left: ' + str(len(cnf)) + ' min_clauses_left: ' + str(min_clauses_left))
+
+    if len(cnf) == 0:
+        return True, assignments
+
+    if any([len(c) == 0 for c in cnf]):
+        return False, None
+
+
+
+    literal = heuristic_literal(cnf)
+
+    new_cnf = [c for c in cnf if (literal, True) not in c]
+    new_cnf = [c.difference({(literal, False)}) for c in new_cnf]
+    sat, vals = dpll_heur(new_cnf, {**assignments, **{literal: True}})
+    if sat:
+        return sat, vals
+
+    new_cnf = [c for c in cnf if (literal, False) not in c]
+    new_cnf = [c.difference({(literal, True)}) for c in new_cnf]
+    sat, vals = dpll_heur(new_cnf, {**assignments, **{literal: False}})
+    if sat:
+        return sat, vals
+
+    return False, None
 
 def read_sudoku(filename):
     with open(filename) as f:
@@ -125,6 +132,8 @@ def read_rules(filename):
         rules = f.readlines()
     rules = rules[1:]
     return [x.strip() for x in rules]
+
+rules = read_rules("rules.txt")
 
 
 def make_cnf(rules):
@@ -189,79 +198,134 @@ def draw_sudoku(solution):
     print(seven)
     print(eight)
     print(nine)
+file = open("output.txt", "w")
+
+for filename in sudokus:
+    rules = read_sudoku(filename) + rules
+    cnf = make_cnf(rules)
+    start = time.time()
+    solved, solution = dpll(cnf)
+
+    # print('\nsolution: ' + str(solution))
+    stop = time.time()
+    time_taken = stop - start
+    # print('\ntime taken: ' + str(time_taken))
+    file.write(str(time_taken) + '\n')
+file.close()
 
 
 
-def monitoring(inputfiles, strategy, output_file=os.path.join(os.getcwd(), 'data', 'metrics.csv')):
-    methods = {
-        Algo.dpll: __select_literal,
-        Algo.dlcs: heuristic_literal
-    }[strategy]
+def write_file(vars, output):
+    n_vars = len(vars)
 
-    result = []
+    letters = "p cnf {} {}\n".format(n_vars, n_vars)
 
-    for inputfile in inputfiles:
-        clauses = read_sudoku(inputfile)
-        out_file = inputfile + '.out'
-        cnf = make_cnf(clauses)
-        solved, solution = dpll(cnf)
-        start = time.time()
-        stop = time.time()
-        time_taken = stop - start
-        result.append({
-            'inputfile': inputfile,
-            'solved': solved,
-            'time': time_taken,
-            'strategy': strategy.name,
-
-        })
-    return result
+    with open(output, "w") as f:
+        f.write(letters)
+        for var, s in vars.items():
+            if s == 1:
+                f.write("{} 0\n".format(var))
+            elif s == -1:
+                f.write("-{} 0\n".format(var))
 
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-S', '--strategy', dest='strategy', type=int, default=1,
-                        help='1 for the basic DP and n = 2 or 3 for the two other strategies')
-    parser.add_argument('inputfiles', nargs='*', default=[os.path.join(os.getcwd(), 'data', 'sudoku-example-full.txt')],
-                        help='[required] input file', metavar="FILE")
-
-    args = parser.parse_args()
-    inputfiles = args.inputfiles
-    strategy = Algo(args.strategy)
-
-    monitoring(inputfiles, strategy)
-
-
+# if __name__ == "__main__":
+#     arg_parser = argparse.ArgumentParser()
+#
+#     arg_parser.add_argument(
+#         "-S",
+#         "--heuristics",
+#         type=int,
+#         choices=list(range(2))
+#     )
+#
+#     arg_parser.add_argument(
+#         "input_file", type=str, help="SAT Solver"
+#     )
+#
+#     arguments = arg_parser.parse_args()
+#     input = arguments.input_file
+#     output = input + ".out"
+#
+#
+#     clauses = read_sudoku(input) + rules
+#     cnf = make_cnf(clauses)
+#     solved, solution = dpll_heur(cnf)
+#
+#     if solved is True:
+#         print('Solved to {}'.format(output))
+#         write_file(solution, output)
+#     else:
+#         print("No solution")
+#         with open(output, "w"):
+#             pass
 
 
 if __name__ == '__main__':
-    main()
+    arg_parser = argparse.ArgumentParser()
+
+    arg_parser.add_argument(
+        "-S",
+        "--heuristics",
+        type=int,
+        choices=list(range(2))
+    )
+
+    arg_parser.add_argument(
+        "input_file", type=str, help="SAT Solver"
+    )
+
+    arguments = arg_parser.parse_args()
+    input = arguments.input_file
+    output = input + ".out"
+
+    heur = ['dpll', 'dlcs']
+
+    if heur == 'dpll':
+        heuristics = __select_literal
+    elif heur == 'dlcs':
+        heuristics = heuristic_literal
+
+    for input in sudokus:
+        rules = read_sudoku(input) + rules
+        cnf = make_cnf(rules)
+        start = time.time()
+        solved, solution = dpll(cnf)
+        print('\nsolution: ' + str(solved))
+        stop = time.time()
+        time_taken = stop - start
+        print('\ntime taken: ' + str(time_taken))
+        # draw_sudoku(solution)
+
+        file = open("output.txt", "w")
+        file.write(str(input) + '\n' + str(heur) + '\n' + str(time_taken) +'\n')
+        file.close()
 
 
 
 
+    # heur = sys.argv[1]
+    # if heur == '1' or heur is None:
+    #     heuristics = __select_literal
+    #
+    # elif heur == '2':
+    #     heuristics = heuristic_literal
+    # filename = sys.argv[2]
+    # for filename in sudokus:
+    #     rules = read_sudoku(filename) + rules
+    #     cnf = make_cnf(rules)
+    #     start = time.time()
+    #     solved, solution = dpll(cnf)
+    #     print('\nsolution: ' + str(solved))
+    #     stop = time.time()
+    #     time_taken = stop - start
+    #     print('\ntime taken: ' + str(time_taken))
+    #     draw_sudoku(solution)
+    #
+    #     file = open("output.txt", "w")
+    #     file.write(str(filename) + '\n' + str(heur) + '\n' + str(time_taken) +'\n')
+    #     file.close()
 
-#
-#
-#
-# # rules = read_rules("biggerTest.txt")
-# rules = read_rules("rules.txt")
-# rules = read_sudoku("hardest.txt") + rules
-# print(len(rules))
-#
-# print(rules)
-# cnf = make_cnf(rules)
-# variables = set(p[0] for c in cnf for p in c)
-# print(cnf)
-#
-# start = time.time()
-# solved, solution = dpll(cnf)
-# print('\nsolution: ' + str(solved))
-# stop = time.time()
-# time_taken = stop - start
-# print(time_taken)
-#
-# draw_sudoku(solution)
 
 

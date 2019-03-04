@@ -1,5 +1,14 @@
 import time
 from collections import Counter
+import glob
+
+path = "./data/*.txt"
+files = glob.glob(path)
+
+for file in files:
+    print(file)
+
+
 
 # returns from the smallest clause the most used variable.
 def heuristic_literal(cnf):
@@ -180,13 +189,20 @@ def draw_sudoku(solution):
 
 
 
-# rules = read_rules("biggerTest.txt")
 rules = read_rules("rules.txt")
-rules = read_sudoku("hardest.txt") + rules
-print(len(rules))
 
-print(rules)
-cnf = make_cnf(rules)
+input = []
+
+for name in files:
+    with open(name) as f:
+        rules = f.read()
+        rules = rules.split()
+        input.append(rules)
+
+
+i = (input[1])
+
+cnf = make_cnf(i)
 variables = set(p[0] for c in cnf for p in c)
 print(cnf)
 
@@ -195,6 +211,6 @@ solved, solution = dpll(cnf)
 print('\nsolution: ' + str(solved))
 stop = time.time()
 time_taken = stop - start
-print(time_taken)
+print('\ntime taken: ' + str(time_taken))
 
 draw_sudoku(solution)
